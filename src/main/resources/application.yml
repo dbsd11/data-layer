@@ -1,0 +1,100 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: data-layer-${spring.profiles.active}
+  main:
+    allow-bean-definition-overriding: true
+  cache:
+    cache-names: local-cache,soulApiCache
+    type: caffeine
+    caffeine.spec: initialCapacity=50,maximumSize=10000,expireAfterWrite=1h
+
+server:
+  port: 50000
+  servlet:
+    context-path: /
+    path: /
+
+management.endpoints.web.exposure.include: '*'
+management.health.defaults.enabled: false
+
+common:
+  swagger:
+    enabled: true
+    title: data-layer
+    description: 数据对接层
+    version: 1.0
+    base-package: group.bison.data.data_layer.drill.controller
+
+systemEnv: >
+  druidIoApiHost druidIoApiUser druidIoApiUserPassword
+
+---
+spring:
+  profiles: dev
+postgresql:
+  url: jdbc:postgresql://127.0.0.1:15432/postgres?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useLocalSessionState=true&stringType=unspecified
+  username: postgres
+  password: postgres
+  driverClassName: org.postgresql.Driver
+promethus:
+  pushgateway:
+    host: promethus:9091
+  api:
+    host: http://promethus:9090/api/v1
+soul:
+  sync:
+    websocket:
+      urls: ws://localhost:9095/websocket
+  http:
+    adminUrl: http://localhost:9095
+    port: 50000
+    contextPath: /soul-api
+    full: false
+  httpclient:
+    strategy: localWebClient
+  cookieAuth:
+#    host: https://cookieAuth:8080
+
+---
+spring:
+  profiles: test
+promethus:
+  pushgateway:
+    host: promethus:9091
+  api:
+    host: http://promethus:9090/api/v1
+soul:
+  sync:
+    websocket:
+      urls: ws://soul-admin:9095/websocket
+  http:
+    adminUrl: http://soul-admin:9095
+    port: 50000
+    contextPath: /soul-api
+    full: false
+  httpclient:
+    strategy: localWebClient
+  cookieAuth:
+#    host: https://cookieAuth:8080
+
+---
+spring:
+  profiles: prod
+promethus:
+  pushgateway:
+    host: promethus:9091
+  api:
+    host: http://promethus:9090/api/v1
+soul:
+  sync:
+    websocket:
+      urls: ws://soul-admin:9095/websocket
+  http:
+    adminUrl: http://soul-admin:9095
+    port: 50000
+    contextPath: /soul-api
+    full: false
+  httpclient:
+    strategy: localWebClient
